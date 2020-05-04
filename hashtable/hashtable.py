@@ -16,6 +16,10 @@ class HashTable:
 
     Implement this.
     """
+    def __init__(self, CAPACITY):
+        self.capacity = CAPACITY 
+        self.size = 0 
+        self.storage = [None] * self.capacity
 
     def fnv1(self, key):
         """
@@ -30,6 +34,12 @@ class HashTable:
 
         Implement this, and/or FNV-1.
         """
+        hash = 5381
+        for x in key:
+            hash = (( hash << 5) + hash) + ord(x)
+        return hash & 0xFFFFFFFF
+
+
 
     def hash_index(self, key):
         """
@@ -47,6 +57,18 @@ class HashTable:
 
         Implement this.
         """
+        self.size += 1 
+        index = self.hash_index(key)
+        node = self.storage[index]
+        if node is None:
+            self.storage[index] = HashTableEntry(key, value)
+
+        prev = node 
+        while node is not None:
+            prev = node 
+            node = node.next 
+
+            prev.next = HashTableEntry(key, value)
 
     def delete(self, key):
         """
@@ -56,6 +78,31 @@ class HashTable:
 
         Implement this.
         """
+        index = self.hash_index(key)
+
+        node = self.storage[index]
+
+        prev = None
+
+        while node is not None and node.key != key:
+            prev = node 
+            node = node.next 
+
+            if node is None:
+                return None
+
+            else:
+                self.size -= 1
+                result = node.value
+
+            if prev == None:
+                node = None
+
+            else: 
+                prev.next = prev.next.next 
+
+            return result 
+                
 
     def get(self, key):
         """
@@ -65,6 +112,20 @@ class HashTable:
 
         Implement this.
         """
+        index = self.hash_index(key)
+
+        node = self.storage[index]
+
+        while node is not None and node.key != key:
+            node = node.next
+
+        if node is None:
+            return None
+
+        else:
+            return node.value 
+
+
 
     def resize(self):
         """
@@ -73,6 +134,8 @@ class HashTable:
 
         Implement this.
         """
+        # self.capacity = self.capacity * 2 
+        # for item in self.storage:
 
 if __name__ == "__main__":
     ht = HashTable(2)
