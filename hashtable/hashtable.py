@@ -88,22 +88,12 @@ class DoublyLinkedList:
             current = current.next
         return max
 
-# class HashTableEntry:
-#     """
-#     Hash Table entry, as a linked list node.
-#     """
-
-#     def __init__(self, key, value):
-#         self.key = key
-#         self.value = value
-#         self.next = None
-
-
 class HashTable:
     def __init__(self, CAPACITY):
         self.capacity = CAPACITY 
         self.size = 0 
         self.storage = []
+        self.load_factor = self.size/self.capacity
         
         for x in range(0, self.capacity):
             DLL = DoublyLinkedList()
@@ -119,6 +109,9 @@ class HashTable:
         return self.djb2(key) % self.capacity
 
     def put(self, key, value):
+        if self.load_factor > 0.7:
+            self.resize()
+            
         self.size += 1 
         index = self.hash_index(key)
         DLL = self.storage[index]
@@ -127,24 +120,31 @@ class HashTable:
     def delete(self, key):
         index = self.hash_index(key)
         node = self.storage[index].head
-        while node.key != key:
-            node = node.next 
-        DLL = self.storage[index]   
-        DLL.remove_from_head()
-               
+        DLL = self.storage[index]
+        while node:
+            if node.key == key:
+                DLL.delete(node)
+                self.size -= 1
+            node = node.next
+            
+        if (self.load_factor < 0.2) & (self.size > 128):
+            self.resize(0.5)
+                
     def get(self, key):
         index = self.hash_index(key)
         node = self.storage[index].head
+        if node == None:
+            return None
         while node.key != key:
             node = node.next 
         return node.value     
            
-    def resize(self):
+    def resize(self, size=2):
         old_storage = self.storage
         self.storage = []
-        new_cap = self.capacity*2
+        self.capacity = int(self.capacity*size)
         
-        for x in range(0, new_cap):
+        for x in range(self.capacity):
             DLL = DoublyLinkedList()
             self.storage.append(DLL)
             
